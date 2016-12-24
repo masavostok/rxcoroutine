@@ -1,1 +1,3 @@
 # rxcoroutine
+
+UniRxを隠蔽してFromCoroutineを呼ぶ方法はないかな
