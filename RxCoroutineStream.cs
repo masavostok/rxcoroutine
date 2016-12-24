@@ -15,6 +15,11 @@ public class RxCoroutineStream
     private IObserver<string> _observer;
     private int _step;
     private string _state = "";
+    public string GetState()
+    {
+        return _state;
+    }
+    private IDisposable _disposable;
 
     public RxCoroutineStream()
     {
@@ -35,7 +40,7 @@ public class RxCoroutineStream
     public void Subscribe(Action<string> onStatus, Action onCompleteAll, Action<Exception> onError)
     {
         _step = 0;
-        Observable.FromCoroutine<string>(a => entryCoroutine(a))
+        _disposable = Observable.FromCoroutine<string>(a => entryCoroutine(a))
         .Subscribe(
             no => { //if (onStartStep != null) {
                 onStatus(no);
@@ -99,8 +104,13 @@ public class RxCoroutineStream
         return new WaitUntil(() => _step == stepNo);
     }
 
+    /**
+     * 指定のステータスまで待つ
+     */
     public IEnumerator WaitState(string aState)
     {
         return new WaitUntil(() => _state == aState);
     }
+
+
 }
