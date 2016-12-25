@@ -11,7 +11,7 @@ using UniRx;
 public class RxCoroutineStream
 {
     private Func<IEnumerator> _customCoroutine;
-    private Coroutine _mainTask;
+    private Coroutine _mainTask = null;
     private IObserver<string> _observer;
     private int _step;
     private string _state = "";
@@ -19,12 +19,15 @@ public class RxCoroutineStream
     {
         return _state;
     }
-    private IDisposable _disposable;
+    private IDisposable _disposable = null;
 
     public RxCoroutineStream()
     {
     }
 
+    /**
+     * 発行
+     */
     public RxCoroutineStream Publish(Coroutine task/*Func<IEnumerator> userCoroutine*/)
     {
         _mainTask = task;
@@ -37,20 +40,32 @@ public class RxCoroutineStream
         Subscribe(null, onComplete, null);
     }
 
-    public void Subscribe(Action<string> onStatus, Action onCompleteAll, Action<Exception> onError)
+    /**
+     * 監視開始
+     */
+    public RxCoroutineStream Subscribe(Action<string> onStatus, Action onCompleteAll, Action<Exception> onError)
     {
         _step = 0;
         _disposable = Observable.FromCoroutine<string>(a => entryCoroutine(a))
         .Subscribe(
-            no => { //if (onStartStep != null) {
-                onStatus(no);
-                _state = no;
-                //    } 
+            no => {
+                if (onStatus != null) {
+                    onStatus(no);
+                    _state = no;
+                } 
             },
-            ex => { onError(ex); },
-            () => { onCompleteAll(); }
+            ex => {
+                if (onError != null) {
+                    onError(ex);
+                }
+            },
+            () => {
+                if (onCompleteAll != null) {
+                    onCompleteAll();
+                }
+            }
         );
-
+        return this;
     }
 
     private IEnumerator entryCoroutine(IObserver<string> observer)
@@ -69,6 +84,9 @@ public class RxCoroutineStream
         return this;
     }
 
+    /**
+     * State変更
+     */
     public RxCoroutineStream ChangeState(string state)
     {
         _observer.OnNext(state);
@@ -105,12 +123,25 @@ public class RxCoroutineStream
     }
 
     /**
-     * 指定のステータスまで待つ
+     * 指定のStateまで待つ
      */
     public IEnumerator WaitState(string aState)
     {
         return new WaitUntil(() => _state == aState);
     }
 
+    public void Dispose()
+    {
+        if(_disposable != null) {
+            _disposable.Dispose();
+        }
+    }
 
+    public void AddTo(GameObject obj)
+    {
+        if (_disposable != null) {
+            _disposable.AddTo(obj);
+        }
+        //return this;
+    }
 }
