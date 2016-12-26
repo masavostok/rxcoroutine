@@ -80,6 +80,7 @@ public class RxCoroutineStream
      */
     public RxCoroutineStream Next()
     {
+        _step++;
         _observer.OnNext("");
         return this;
     }
