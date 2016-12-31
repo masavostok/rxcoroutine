@@ -6,13 +6,13 @@ UniRxを隠蔽してFromCoroutineを呼ぶ方法はないかな
 
 ## Requirement
 
-UniRx required
+Unity 5.x / UniRx  required
 
 ## Install
 
 Put "RxCoroutineStream.cs" into "Assets" folder
 
-## Code sample
+## Sample code
 
 ```
 public class Main : MonoBehaviour
@@ -24,28 +24,39 @@ public class Main : MonoBehaviour
         rx.Publish(StartCoroutine(sequence()))
         .Subscribe(
             stat => {
-                Debug.Log("Status#" + stat);
             },
             () => {
                 Debug.Log("Complete");
             },
-            err => { }
+            err => { 
+                Debug.Log("Abort " + err.Message);
+            }
             ).AddTo(this.gameObject);
     }
         
     IEnumerator sequence()
     {
+        yield return rx.WaitState("st-1");
         Debug.Log("Phase 1");
-        yield return rx.WaitState("PRESS");
+        yield return rx.WaitState("st-2");
         Debug.Log("Phase 2");
-        yield return rx.WaitState("PRESS");
         rx.Complete();
     }
-    
+
     void Update()
     {
-        if (Input.GetMouseButtonDown(0)) {
-            rx.ChangeState("PRESS");
+        if (Input.GetKey(KeyCode.A)) {
+            rx.ChangeState("st-1");
+        }
+        if (Input.GetKey(KeyCode.B)) {
+            rx.ChangeState("st-2");
+        }
+        if (Input.GetKey(KeyCode.E)) {
+            //エラーが発生した時
+            rx.Abort(new Exception("An error occurred"));
+        }
+        if (Input.GetKey(KeyCode.Q)) {
+            rx.Complete();
         }
     }
 }
@@ -53,4 +64,4 @@ public class Main : MonoBehaviour
 
 ## 目的
 
-UniRxが分からない人にFromCoroutineを使ってもらうために作った
+UniRxが分からない人にFromCoroutineを使ってもらう用（エラー遷移の記述が楽になるので）
