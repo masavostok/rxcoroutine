@@ -1,4 +1,4 @@
-# rxcoroutine
+# RxCoroutineStream
 
 Overview
 
@@ -8,7 +8,7 @@ UniRxを隠蔽してFromCoroutineを呼ぶ方法はないかな
 
 UniRx required
 
-## インストール
+## Install
 
 Put "RxCoroutineStream.cs" into "Assets" folder
 
