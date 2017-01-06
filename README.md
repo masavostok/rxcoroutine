@@ -24,11 +24,14 @@ public class Main : MonoBehaviour
         rx.Publish(StartCoroutine(sequence()))
         .Subscribe(
             stat => {
-            },
+                //ステータスが変更された
+            },
             () => {
+                //すべて完了した
                 Debug.Log("Complete");
             },
             err => { 
+                //途中でエラーが発生した
                 Debug.Log("Abort " + err.Message);
             }
             ).AddTo(this.gameObject);
@@ -37,22 +40,23 @@ public class Main : MonoBehaviour
     IEnumerator sequence()
     {
         yield return rx.WaitState("st-1");
-        Debug.Log("Phase 1");
+        Debug.Log("Phase 1 が実行された");  
         yield return rx.WaitState("st-2");
-        Debug.Log("Phase 2");
+        Debug.Log("Phase 2 が実行された");        
         rx.Complete();
     }
 
     void Update()
     {
-        if (Input.GetKey(KeyCode.A)) {
+        //ステータスを変更する処理
+        if (Input.GetKey(KeyCode.A)) {
             rx.ChangeState("st-1");
         }
         if (Input.GetKey(KeyCode.B)) {
             rx.ChangeState("st-2");
         }
         if (Input.GetKey(KeyCode.E)) {
-            //エラーが発生した時
+            //エラーを発生させてみる
             rx.Abort(new Exception("An error occurred"));
         }
         if (Input.GetKey(KeyCode.Q)) {
