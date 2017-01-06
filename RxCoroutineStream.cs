@@ -10,7 +10,6 @@ using UniRx;
  */
 public class RxCoroutineStream
 {
-    private Func<IEnumerator> _customCoroutine;
     private Coroutine _mainTask = null;
     private IObserver<string> _observer;
     private int _step;
@@ -28,10 +27,9 @@ public class RxCoroutineStream
     /**
      * 発行
      */
-    public RxCoroutineStream Publish(Coroutine task/*Func<IEnumerator> userCoroutine*/)
+    public RxCoroutineStream Publish(Coroutine task)
     {
         _mainTask = task;
-        //_customCoroutine = userCoroutine;
         return this;
     }
 
@@ -143,6 +141,5 @@ public class RxCoroutineStream
         if (_disposable != null) {
             _disposable.AddTo(obj);
         }
-        //return this;
     }
 }
